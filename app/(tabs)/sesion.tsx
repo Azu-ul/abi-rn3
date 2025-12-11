@@ -5,7 +5,7 @@ import { GoogleSignin, GoogleSigninButton, isSuccessResponse } from '@react-nati
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View, } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -184,54 +184,85 @@ export default function sesion()
       <ScrollView contentContainerStyle={styles.scroll}>
         <HeaderReact />
         {!iniciando ? (
-          <>
-            <Text style={styles.title}>Iniciar Sesión o Registrarse</Text>
+          <View style={styles.content}>
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>Gestiona tu cuenta</Text>
+              <Text style={styles.subtitle}>Inicia sesión o regístrate para continuar</Text>
+            </View>
+            
             <View style={styles.switchContainer}>
-              <Text style={styles.switchLabel}>Inicio</Text>
+              <Text style={[styles.switchLabel, !tipo && styles.switchLabelActive]}>Iniciar Sesión</Text>
               <Switch
                 onValueChange={setTipo}
                 value={tipo}
-                trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={tipo ? '#f5dd4b' : '#f4f3f4'}
+                trackColor={{ false: '#E0E0E0', true: '#FFCDD2' }}
+                thumbColor={tipo ? '#E53935' : '#757575'}
               />
-              <Text style={styles.switchLabel}>Registro</Text>
+              <Text style={[styles.switchLabel, tipo && styles.switchLabelActive]}>Registrarse</Text>
             </View>
 
-            <View style={styles.container}>
+            <View style={styles.formContainer}>
               <Text style={styles.formTitle}>
-                {tipo ? 'Registro' : 'Inicio de Sesión'}
+                {tipo ? '✨ Crear nueva cuenta' : '🔐 Acceder a tu cuenta'}
               </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Email"
-                onChangeText={setEmail}
-                autoCapitalize="none"
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Contraseña"
-                secureTextEntry
-                onChangeText={setPassword}
-              />
-              {tipo && (
+              
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Correo electrónico</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Confirmar Contraseña"
-                  secureTextEntry
-                  onChangeText={setConfirmacion}
+                  placeholder="tu@email.com"
+                  placeholderTextColor="#999"
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
                 />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Contraseña</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Mínimo 6 caracteres"
+                  placeholderTextColor="#999"
+                  secureTextEntry
+                  onChangeText={setPassword}
+                />
+              </View>
+
+              {tipo && (
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Confirmar contraseña</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Repite tu contraseña"
+                    placeholderTextColor="#999"
+                    secureTextEntry
+                    onChangeText={setConfirmacion}
+                  />
+                </View>
               )}
+              
               <Pressable
                 onPress={() => {
                   tipo ? registro() : inicioSesion();
                 }}
-                style={styles.boton}
-              >
-                <Text style={styles.subtitulo}>
-                  {tipo ? 'Registrarse' : 'Iniciar Sesión'}
+                style={({pressed}) => [styles.boton, pressed && styles.botonPressed]}>
+                <Text style={styles.botonText}>
+                  {tipo ? '🚀 Registrarse' : '🔓 Iniciar Sesión'}
                 </Text>
               </Pressable>
-              {error !== '' && <Text style={styles.error}>{error}</Text>}
+
+              {error !== '' && (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.error}>⚠️ {error}</Text>
+                </View>
+              )}
+            </View>
+
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>o continuar con</Text>
+              <View style={styles.dividerLine} />
             </View>
 
             <View style={styles.googleContainer}>
@@ -242,53 +273,60 @@ export default function sesion()
                 disabled={isSubmitting}
               />
             </View>
-          </>
+          </View>
         ) : (
-          <>
-            <Text style={styles.title}>Seleccionar tipo de registro</Text>
-            <Pressable
-              style={styles.boton}
-              onPress={() => {
-                router.push('/');
-              }}
-            >
-              <Text style={styles.subtitulo}>Continuar como Espectador</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                setTipoRegistro(1);
-              }}
-              style={styles.boton}
-            >
-              <Text style={styles.subtitulo}>Registrarse como Jugador</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                setTipoRegistro(2);
-              }}
-              style={styles.boton}
-            >
-              <Text style={styles.subtitulo}>
-                Registrarse como Director Técnico
-              </Text>
-            </Pressable>
+          <View style={styles.content}>
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>¡Bienvenido! 🎉</Text>
+              <Text style={styles.subtitle}>Selecciona cómo quieres usar la aplicación</Text>
+            </View>
 
-            {tipoRegistro == 0 ? (
-              <></>
-            ) : tipoRegistro == 1 ? (
+            <View style={styles.roleContainer}>
+              <Pressable
+                style={({pressed}) => [styles.roleCard, pressed && styles.roleCardPressed]}
+                onPress={() => {
+                  router.push('/');
+                }}>
+                <Text style={styles.roleIcon}>👀</Text>
+                <Text style={styles.roleTitle}>Espectador</Text>
+                <Text style={styles.roleDescription}>Explora equipos y jugadores</Text>
+              </Pressable>
+
+              <Pressable
+                style={({pressed}) => [styles.roleCard, pressed && styles.roleCardPressed]}
+                onPress={() => {
+                  setTipoRegistro(1);
+                }}>
+                <Text style={styles.roleIcon}>⚽</Text>
+                <Text style={styles.roleTitle}>Jugador</Text>
+                <Text style={styles.roleDescription}>Forma parte de un equipo</Text>
+              </Pressable>
+
+              <Pressable
+                style={({pressed}) => [styles.roleCard, pressed && styles.roleCardPressed]}
+                onPress={() => {
+                  setTipoRegistro(2);
+                }}>
+                <Text style={styles.roleIcon}>👔</Text>
+                <Text style={styles.roleTitle}>Director Técnico</Text>
+                <Text style={styles.roleDescription}>Dirige tu propio equipo</Text>
+              </Pressable>
+            </View>
+
+            {tipoRegistro == 1 ? (
               <UserData
                 sendData={sendJugador}
                 inputData={new FormData()}
                 tipo={1}
               />
-            ) : (
+            ) : tipoRegistro == 2 ? (
               <UserData
                 sendData={sendDirector}
                 inputData={new FormData()}
                 tipo={2}
               />
-            )}
-          </>
+            ) : null}
+          </View>
         )}
       </ScrollView>
     </KeyboardAvoidingView>
@@ -297,76 +335,174 @@ export default function sesion()
 
 const styles = StyleSheet.create({
   scroll: {
+    backgroundColor: '#f5f5f5',
+    minHeight: '100%',
+  },
+  content: {
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+  },
+  titleContainer: {
+    marginBottom: 24,
     alignItems: 'center',
-    backgroundColor: '#111111', // gris muy oscuro de fondo
-    paddingVertical: 30,
-    height: '100%',
   },
   title: {
-    fontSize: 20,
-    marginTop: 20,
-    fontWeight: '600',
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
     textAlign: 'center',
-    color: 'white',
   },
   switchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  switchLabel: {
-    fontSize: 15,
-    marginHorizontal: 10,
-    color: 'white',
-  },
-  container: {
-    textAlign: 'center',
     justifyContent: 'center',
-    backgroundColor: '#222222', // gris oscuro
-    width: 320,
-    borderRadius: 5,
-    alignItems: 'center',
-    paddingVertical: 15,
-  },
-  formTitle: {
-    color: '#ff4b4b', // rojo fuerte
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  input: {
-    backgroundColor: '#333333', // gris medio
-    width: 250,
-    height: 40,
-    borderColor: '#ff4b4b',
-    borderWidth: 2,
-    borderRadius: 5,
-    marginTop: 5,
-    marginBottom: 5,
-    color: 'white',
-    paddingHorizontal: 8,
-  },
-  boton: {
-    backgroundColor: '#d9262f', // rojo destacado
-    marginVertical: 5,
-    borderColor: '#800000',
-    borderWidth: 2,
-    borderRadius: 5,
-    padding: 8,
-    width: 220,
-  },
-  subtitulo: {
-    color: 'white',
-    fontSize: 15,
-    textAlign: 'center',
-  },
-  error: {
-    textAlign: 'center',
-    fontSize: 15,
-    color: '#ff4b4b',
-    marginTop: 5,
-  },
-  googleContainer: {
-    marginTop: 15,
-  },
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: {width: 0, height: 2},
+shadowRadius: 4,
+elevation: 2,
+},
+switchLabel: {
+fontSize: 16,
+marginHorizontal: 12,
+color: '#999',
+fontWeight: '500',
+},
+switchLabelActive: {
+color: '#E53935',
+fontWeight: '600',
+},
+formContainer: {
+backgroundColor: '#ffffff',
+borderRadius: 16,
+padding: 24,
+shadowColor: '#000',
+shadowOpacity: 0.08,
+shadowOffset: {width: 0, height: 4},
+shadowRadius: 8,
+elevation: 3,
+},
+formTitle: {
+color: '#E53935',
+fontSize: 20,
+fontWeight: 'bold',
+marginBottom: 20,
+textAlign: 'center',
+},
+inputGroup: {
+marginBottom: 16,
+},
+inputLabel: {
+color: '#333',
+fontSize: 14,
+fontWeight: '600',
+marginBottom: 8,
+},
+input: {
+backgroundColor: '#f5f5f5',
+height: 50,
+borderWidth: 2,
+borderColor: '#e0e0e0',
+borderRadius: 12,
+paddingHorizontal: 16,
+fontSize: 16,
+color: '#333',
+},
+boton: {
+backgroundColor: '#E53935',
+marginTop: 8,
+borderRadius: 12,
+paddingVertical: 14,
+shadowColor: '#E53935',
+shadowOpacity: 0.3,
+shadowOffset: {width: 0, height: 4},
+shadowRadius: 8,
+elevation: 4,
+},
+botonPressed: {
+backgroundColor: '#D32F2F',
+transform: [{scale: 0.98}],
+},
+botonText: {
+color: '#ffffff',
+fontSize: 16,
+fontWeight: 'bold',
+textAlign: 'center',
+},
+errorContainer: {
+backgroundColor: '#FFEBEE',
+borderRadius: 8,
+padding: 12,
+marginTop: 16,
+borderLeftWidth: 4,
+borderLeftColor: '#E53935',
+},
+error: {
+color: '#C62828',
+fontSize: 14,
+textAlign: 'center',
+},
+divider: {
+flexDirection: 'row',
+alignItems: 'center',
+marginVertical: 24,
+},
+dividerLine: {
+flex: 1,
+height: 1,
+backgroundColor: '#e0e0e0',
+},
+dividerText: {
+marginHorizontal: 16,
+color: '#999',
+fontSize: 14,
+},
+googleContainer: {
+alignItems: 'center',
+},
+roleContainer: {
+gap: 16,
+marginTop: 20,
+},
+roleCard: {
+backgroundColor: '#ffffff',
+borderRadius: 16,
+padding: 20,
+alignItems: 'center',
+shadowColor: '#000',
+shadowOpacity: 0.08,
+shadowOffset: {width: 0, height: 4},
+shadowRadius: 8,
+elevation: 3,
+borderWidth: 2,
+borderColor: 'transparent',
+},
+roleCardPressed: {
+borderColor: '#E53935',
+transform: [{scale: 0.98}],
+},
+roleIcon: {
+fontSize: 48,
+marginBottom: 12,
+},
+roleTitle: {
+fontSize: 20,
+fontWeight: 'bold',
+color: '#333',
+marginBottom: 8,
+},
+roleDescription: {
+fontSize: 14,
+color: '#666',
+textAlign: 'center',
+},
 });
